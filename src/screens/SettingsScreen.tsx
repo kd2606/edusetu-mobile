@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 
@@ -7,6 +8,7 @@ export function SettingsScreen() {
   const [profile, setProfile] = useState<any>(null);
   const [fullName, setFullName] = useState('');
   const [bio, setBio] = useState('');
+  const [apiUrl, setApiUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
@@ -19,6 +21,9 @@ export function SettingsScreen() {
         setFullName(user.user_metadata?.full_name || '');
         setBio(user.user_metadata?.bio || '');
       }
+      const savedApiUrl = await AsyncStorage.getItem('API_URL');
+      if (savedApiUrl) setApiUrl(savedApiUrl);
+      
       setLoading(false);
     }
     fetchProfile();
@@ -27,6 +32,8 @@ export function SettingsScreen() {
 
   async function handleSave() {
     setSaving(true);
+    await AsyncStorage.setItem('API_URL', apiUrl || 'http://192.168.1.100:3000');
+    
     const { error } = await supabase.auth.updateUser({
       data: { full_name: fullName, bio: bio }
     });
@@ -77,6 +84,16 @@ export function SettingsScreen() {
           placeholder="Tell us about yourself..."
           placeholderTextColor="#71717a"
           multiline
+        />
+
+        <Text style={[s.label, { marginTop: 16 }]}>Backend API URL (For AI)</Text>
+        <TextInput
+          style={s.input}
+          value={apiUrl}
+          onChangeText={setApiUrl}
+          placeholder="http://192.168.x.x:3000"
+          placeholderTextColor="#71717a"
+          autoCapitalize="none"
         />
 
         <TouchableOpacity style={[s.btn, saving && { opacity: 0.6 }]} onPress={handleSave} disabled={saving}>

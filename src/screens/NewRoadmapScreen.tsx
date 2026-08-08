@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 import { useNavigation } from '@react-navigation/native';
@@ -20,9 +21,8 @@ export function NewRoadmapScreen() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // In a real production app, this would point to your deployed Next.js API
-      // For local development on device, replace with your PC's IP address
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.29.98:3000';
+      const savedApiUrl = await AsyncStorage.getItem('API_URL');
+      const API_URL = savedApiUrl || process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.100:3000';
       
       const res = await fetch(`${API_URL}/api/generate`, {
         method: 'POST',
