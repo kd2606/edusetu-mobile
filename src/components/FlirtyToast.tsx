@@ -36,14 +36,14 @@ export function FlirtyToast() {
     }
   }, [visible, message, insets.top]);
 
-  if (!message && !visible) return null;
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateY: translateY.value }],
       opacity: opacity.value,
     };
   });
+
+  if (!message && !visible) return null;
 
   return (
     <Animated.View style={[styles.container, animatedStyle]} pointerEvents="none">
