@@ -52,7 +52,7 @@ export function ExploreScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={s.card} 
-            onPress={() => navigation.navigate('Roadmaps', { screen: 'Details', params: { id: item.id } })}
+            onPress={() => navigation.navigate('Roadmaps', { screen: 'RoadmapDetails', params: { id: item.id, title: item.title } })}
           >
             <Text style={s.cardTitle}>{item.title}</Text>
             <Text style={s.cardTopic}>{item.topic}</Text>
