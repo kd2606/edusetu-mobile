@@ -17,7 +17,11 @@ export function AuthScreen() {
 
   async function signUpWithEmail() {
     setLoading(true);
-    const { data: { session }, error } = await supabase.auth.signUp({ email, password });
+    const { data: { session }, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: { emailRedirectTo: 'edusetu://' }
+    });
     if (error) Alert.alert('Error', error.message);
     else if (!session) Alert.alert('Success', 'Please check your inbox for email verification!');
     setLoading(false);
