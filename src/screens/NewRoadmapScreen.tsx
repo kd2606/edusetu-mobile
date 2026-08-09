@@ -21,8 +21,7 @@ export function NewRoadmapScreen() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      const savedApiUrl = await AsyncStorage.getItem('API_URL');
-      const API_URL = savedApiUrl || process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.100:3000';
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://edusetu-six.vercel.app';
       
       const res = await fetch(`${API_URL}/api/generate`, {
         method: 'POST',
