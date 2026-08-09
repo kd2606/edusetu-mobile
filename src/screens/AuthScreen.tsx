@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { supabase } from '../lib/supabase';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -29,14 +32,28 @@ export function AuthScreen() {
 
   async function signInWithGoogle() {
     setLoading(true);
-    // On web, this redirects seamlessly. On native, it may require setting up linking/app scheme.
-    const { error } = await supabase.auth.signInWithOAuth({
+    // Use expo-web-browser for native OAuth
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: Platform.OS === 'web' ? window.location.origin : 'edusetu://'
+        redirectTo: 'edusetu://',
+        skipBrowserRedirect: true, // Crucial for native apps using expo-web-browser
       }
     });
-    if (error) Alert.alert('Google Sign-In Error', error.message);
+    
+    if (error) {
+      Alert.alert('Google Sign-In Error', error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data?.url) {
+      const result = await WebBrowser.openAuthSessionAsync(data.url, 'edusetu://');
+      if (result.type === 'success' && result.url) {
+        // App.tsx deep link handler will catch the URL and set the session!
+      }
+    }
+    
     setLoading(false);
   }
 
