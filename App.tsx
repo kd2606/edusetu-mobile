@@ -1,6 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import * as Linking from 'expo-linking';
 import { supabase } from './src/lib/supabase';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { MainTabs } from './src/navigation/MainTabs';
@@ -23,6 +24,33 @@ export default function App() {
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
+    // Deep linking for Supabase Email Verification / Magic Links
+    const handleDeepLink = async (url: string | null) => {
+      if (!url) return;
+      // Supabase verification returns URL with fragments like #access_token=...&refresh_token=...
+      const hash = url.split('#')[1];
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+        }
+      }
+    };
+
+    Linking.getInitialURL().then(handleDeepLink);
+    const linkingSubscription = Linking.addEventListener('url', (event) => {
+      handleDeepLink(event.url);
+    });
+
+    return () => {
+      linkingSubscription.remove();
+    };
   }, []);
 
   if (loading) {
